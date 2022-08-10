@@ -63,8 +63,8 @@ exports.getSongs = async (req, res, next) => {
       headers
     );
     const genre = req.query.genre
-    
-    const songsResponse = await axios.get(`https://api.spotify.com/v1/search?q=genre:${genre}&type=track`, {
+
+    const songsResponse = await axios.get(`https://api.spotify.com/v1/search?q=genre:${genre}&type=track&limit=4`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + response.data.access_token
@@ -72,7 +72,18 @@ exports.getSongs = async (req, res, next) => {
     })
     const songs = songsResponse.data
 
-    res.send(songs)
+    const parsedResponse = []
+    for (let i = 0; i < 4; i++) {
+      parsedResponse.push({
+        artist: songs.tracks.items[i].album.artists[0].name,
+        image: songs.tracks.items[i].album.images[0].url,
+        song: songs.tracks.items[i].name,
+        audio: songs.tracks.items[i].preview_url
+      })
+
+    }
+
+    res.send(parsedResponse)
   } catch (error) {
     console.log(error);
     res.send(error)
