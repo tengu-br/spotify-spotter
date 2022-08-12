@@ -63,8 +63,11 @@ exports.getSongs = async (req, res, next) => {
       headers
     );
     const genre = req.query.genre
+    const qtd = req.query.qtd > 10 ? 10 : req.query.qtd
+    
+    const randomOffset = Math.floor(Math.random() * 950)
 
-    const songsResponse = await axios.get(`https://api.spotify.com/v1/search?q=genre:${genre}&type=track&limit=4`, {
+    const songsResponse = await axios.get(`https://api.spotify.com/v1/search?q=genre:${genre}&type=track&limit=50&offset=${randomOffset}`, {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + response.data.access_token
@@ -72,15 +75,15 @@ exports.getSongs = async (req, res, next) => {
     })
     const songs = songsResponse.data
 
+    const parsedSongs = songs.tracks.items.filter((e) => e.preview_url !== null)
     const parsedResponse = []
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < qtd; i++) {
       parsedResponse.push({
-        artist: songs.tracks.items[i].album.artists[0].name,
-        image: songs.tracks.items[i].album.images[0].url,
-        song: songs.tracks.items[i].name,
-        audio: songs.tracks.items[i].preview_url
+        artist: parsedSongs[i].album.artists[0].name,
+        image: parsedSongs[i].album.images[0].url,
+        song: parsedSongs[i].name,
+        audio: parsedSongs[i].preview_url
       })
-
     }
 
     res.send(parsedResponse)
